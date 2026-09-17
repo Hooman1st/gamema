@@ -13,6 +13,7 @@
             --accent-cyan: #00d2d3;
             --accent-red: #ff4757;
             --accent-green: #2ed573;
+            --accent-purple: #9b59b6;
         }
 
         * {
@@ -43,6 +44,17 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+        }
+
+        .shake {
+            animation: shakeScreen 0.3s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shakeScreen {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
         }
 
         .scene {
@@ -148,16 +160,17 @@
             background: #181528;
             border: 2px solid #332d52;
             border-radius: 10px;
-            padding: 8px;
+            padding: 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
             cursor: pointer;
+            position: relative;
         }
 
         .card img {
             width: 100%;
-            height: 85px;
+            height: 70px;
             object-fit: contain;
         }
 
@@ -165,7 +178,18 @@
             font-size: 0.8rem;
             font-weight: bold;
             color: var(--accent-gold);
-            margin-top: 6px;
+            margin-top: 4px;
+        }
+
+        .card-ability {
+            font-size: 0.65rem;
+            color: var(--accent-cyan);
+            margin-top: 2px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
         }
 
         .card.selected {
@@ -192,18 +216,18 @@
             pointer-events: auto;
         }
 
-        /* --- BATTLE ARENA --- */
+        /* --- BATTLE ARENA (VERTICAL MOBILE LAYOUT) --- */
         #battle-scene {
             justify-content: space-between;
-            background: linear-gradient(to bottom, #0d0814 0%, #1a102f 50%, #291228 100%);
+            background: radial-gradient(circle, #1a102f 0%, #0d0814 100%);
         }
 
         .status-banner {
             text-align: center;
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: var(--accent-gold);
             font-weight: bold;
-            padding: 12px;
+            padding: 8px;
             z-index: 10;
             background: rgba(0,0,0,0.6);
             border-bottom: 1px solid rgba(243, 156, 18, 0.2);
@@ -211,18 +235,20 @@
 
         .arena {
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: flex-end;
             flex: 1;
-            padding: 0 20px 85px 20px;
+            padding: 10px 15px;
             position: relative;
             z-index: 5;
         }
 
         .team-side {
             display: flex;
-            gap: 12px;
-            align-items: flex-end;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            min-height: 130px;
         }
 
         .full-character {
@@ -235,8 +261,8 @@
 
         .char-sprite-wrap {
             position: relative;
-            width: 80px;
-            height: 170px;
+            width: 75px;
+            height: 110px;
             display: flex;
             justify-content: center;
             align-items: flex-end;
@@ -246,21 +272,23 @@
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
-            filter: drop-shadow(0 8px 6px rgba(0,0,0,0.7));
+            filter: drop-shadow(0 4px 5px rgba(0,0,0,0.7));
             animation: idleBreath 2.8s infinite ease-in-out;
             transform-origin: bottom center;
+            transition: filter 0.3s;
         }
 
+        /* تیم حریف بالا روبروی تیم شما قرار می‌گیرد */
         .enemy-side .char-sprite {
-            transform: scaleX(-1);
+            transform: scaleY(-1) rotate(180deg);
             animation: idleBreathEnemy 2.8s infinite ease-in-out;
         }
 
         .shadow-ellipse {
             position: absolute;
             bottom: -5px;
-            width: 55px;
-            height: 10px;
+            width: 50px;
+            height: 8px;
             background: rgba(0, 0, 0, 0.6);
             border-radius: 50%;
             filter: blur(3px);
@@ -268,12 +296,17 @@
 
         .char-hud {
             position: absolute;
-            top: -38px;
-            width: 70px;
+            top: -28px;
+            width: 65px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
+        }
+
+        .enemy-side .char-hud {
+            top: auto;
+            bottom: -28px;
         }
 
         .char-name-label {
@@ -307,35 +340,40 @@
             filter: drop-shadow(0 0 14px #ffffff);
         }
 
+        .full-character.using-ability .char-sprite {
+            filter: drop-shadow(0 0 22px var(--accent-purple)) brightness(1.3);
+        }
+
         @keyframes idleBreath {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-4px); }
         }
 
         @keyframes idleBreathEnemy {
-            0%, 100% { transform: scaleX(-1) translateY(0); }
-            50% { transform: scaleX(-1) translateY(-4px); }
+            0%, 100% { transform: scaleY(-1) rotate(180deg) translateY(0); }
+            50% { transform: scaleY(-1) rotate(180deg) translateY(-4px); }
         }
 
-        .attack-right-anim {
-            animation: animAttackRight 0.6s ease-in-out forwards !important;
+        /* انیمیشن‌های حمله عمودی */
+        .attack-down-anim {
+            animation: animAttackDown 0.5s ease-in-out forwards !important;
             z-index: 100 !important;
         }
 
-        @keyframes animAttackRight {
+        @keyframes animAttackDown {
             0% { transform: translate(0, 0); }
-            50% { transform: translate(160px, -15px) scale(1.15); }
+            50% { transform: translate(0, 150px) scale(1.25); }
             100% { transform: translate(0, 0); }
         }
 
-        .attack-left-anim {
-            animation: animAttackLeft 0.6s ease-in-out forwards !important;
+        .attack-up-anim {
+            animation: animAttackUp 0.5s ease-in-out forwards !important;
             z-index: 100 !important;
         }
 
-        @keyframes animAttackLeft {
+        @keyframes animAttackUp {
             0% { transform: translate(0, 0); }
-            50% { transform: translate(-160px, -15px) scale(1.15); }
+            50% { transform: translate(0, -150px) scale(1.25); }
             100% { transform: translate(0, 0); }
         }
 
@@ -345,24 +383,29 @@
 
         @keyframes animHurt {
             0%, 100% { filter: none; }
-            25% { filter: brightness(2.5) sepia(1) hue-rotate(-50deg); transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
+            25% { filter: brightness(2.5) sepia(1) hue-rotate(-50deg); transform: translateX(6px); }
+            75% { transform: translateX(-6px); }
         }
 
         .action-bar {
-            height: 75px;
             background: rgba(15, 12, 27, 0.95);
             border-top: 1px solid #3d3d6b;
             display: flex;
-            padding: 10px;
-            gap: 8px;
-            align-items: center;
+            flex-direction: column;
+            padding: 8px;
+            gap: 6px;
             z-index: 20;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
         }
 
         .btn-action {
             flex: 1;
-            height: 100%;
+            padding: 12px 6px;
             background: #2c2c54;
             border: 1px solid #40407a;
             color: #fff;
@@ -370,6 +413,16 @@
             font-size: 0.85rem;
             font-weight: bold;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .btn-action.special {
+            background: linear-gradient(135deg, #8e44ad, #2c3e50);
+            border-color: var(--accent-purple);
         }
 
         .btn-action:disabled {
@@ -377,10 +430,16 @@
             cursor: not-allowed;
         }
 
-        /* --- POP-UP DAMAGE TEXT --- */
+        .btn-subtext {
+            font-size: 0.65rem;
+            color: #ccc;
+            font-weight: normal;
+        }
+
+        /* --- POP-UP DAMAGE / ABILITY TEXT --- */
         .pop-dmg {
             position: fixed;
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             font-weight: 900;
             color: #ff3838;
             text-shadow: 0 0 8px #000, 2px 2px 0px #fff;
@@ -427,14 +486,27 @@
         <div class="status-banner" id="status-text">در حال آماده‌سازی...</div>
         
         <div class="arena">
-            <div class="team-side" id="player-team"></div>
+            <!-- بالا: تیم حریف -->
             <div class="team-side enemy-side" id="enemy-team"></div>
+            <!-- پایین: تیم شما -->
+            <div class="team-side" id="player-team"></div>
         </div>
 
         <div class="action-bar">
-            <button class="btn-action" id="btn-atk" onclick="handleAction('attack')">⚔️ حمله معمولی</button>
-            <button class="btn-action" id="btn-def" onclick="handleAction('defend')">🛡️ دفاع</button>
-            <button class="btn-action" id="btn-ability" onclick="handleAction('ability')" style="border-color: var(--accent-gold);">✨ حرکت ویژه</button>
+            <div class="action-row">
+                <button class="btn-action" id="btn-atk" onclick="handleAction('attack')">
+                    <span>⚔️ حمله معمولی</span>
+                </button>
+                <button class="btn-action" id="btn-def" onclick="handleAction('defend')">
+                    <span>🛡️ دفاع</span>
+                </button>
+            </div>
+            <div class="action-row">
+                <button class="btn-action special" id="btn-ability" onclick="handleAction('ability')">
+                    <span id="ability-btn-name">✨ حرکت ویژه</span>
+                    <span class="btn-subtext" id="ability-btn-desc">قابلیت مخصوص</span>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -444,6 +516,8 @@
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
     }
+
+    document.addEventListener('contextmenu', e => e.preventDefault());
 
     // --- WEB AUDIO API SYSTEM ---
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -457,6 +531,8 @@
     function playSound(type) {
         try {
             initAudio();
+            if (navigator.vibrate) navigator.vibrate(type === 'ability' ? [50, 30, 80] : 40);
+
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
@@ -465,24 +541,24 @@
 
             if (type === 'hit') {
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(160, now);
-                osc.frequency.exponentialRampToValueAtTime(40, now + 0.2);
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.2);
                 gain.gain.setValueAtTime(0.7, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
                 osc.start(now);
                 osc.stop(now + 0.2);
             } else if (type === 'ability') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(250, now);
-                osc.frequency.exponentialRampToValueAtTime(750, now + 0.3);
-                gain.gain.setValueAtTime(0.6, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                osc.start(now);
-                osc.stop(now + 0.3);
-            } else if (type === 'defend') {
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(100, now);
-                osc.frequency.linearRampToValueAtTime(200, now + 0.2);
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.4);
+                gain.gain.setValueAtTime(0.8, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'defend') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.linearRampToValueAtTime(240, now + 0.2);
                 gain.gain.setValueAtTime(0.5, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
                 osc.start(now);
@@ -491,17 +567,17 @@
         } catch (e) {}
     }
 
-    // --- EXACT BALANCED CHARACTER DATA ---
+    // --- CHARACTER DATA WITH UNIQUE ABILITIES ---
     const CHARACTERS = [
-        { id: 'borzu', name: 'برزو', hp: 160, attack: 18, speed: 4, img: 'borzu.png' },
-        { id: 'hejazi', name: 'حجازی', hp: 150, attack: 19, speed: 5, img: 'hejazi.png' },
-        { id: 'komyl', name: 'کمیل', hp: 140, attack: 20, speed: 5, img: 'komyl.png' },
-        { id: 'hooman', name: 'هومن', hp: 130, attack: 21, speed: 6, img: 'hooman.png' },
-        { id: 'iman', name: 'ایمان', hp: 120, attack: 22, speed: 7, img: 'iman.png' },
-        { id: 'pourya', name: 'پوریا', hp: 110, attack: 23, speed: 7, img: 'pourya.png' },
-        { id: 'mirbozorg', name: 'میربزرگ', hp: 95, attack: 28, speed: 8, img: 'mirbozorg.png' },
-        { id: 'mahan', name: 'ماهان', hp: 95, attack: 28, speed: 8, img: 'mahan.png' },
-        { id: 'teacher', name: 'تیچر', hp: 100, attack: 26, speed: 7, img: 'teacher.png' }
+        { id: 'borzu', name: 'برزو', hp: 160, attack: 18, speed: 4, img: 'borzu.png', abilityName: 'مشت آهنین', abilityDesc: 'آسیب سنگین با قدرت ۲ برابر', cd: 3 },
+        { id: 'hejazi', name: 'حجازی', hp: 150, attack: 19, speed: 5, img: 'hejazi.png', abilityName: 'ضربه گیج‌کننده', abilityDesc: 'آسیب شدید و شانس جابه‌جایی', cd: 2 },
+        { id: 'komyl', name: 'کمیل', hp: 140, attack: 20, speed: 5, img: 'komyl.png', abilityName: 'شوت وحشیانه', abilityDesc: 'حمله پرقدرت مستقیم', cd: 3 },
+        { id: 'hooman', name: 'هومن', hp: 130, attack: 21, speed: 6, img: 'hooman.png', abilityName: 'تک‌نواز مرگ', abilityDesc: 'ضربه بحرانی با کریپتیک ضرب بالا', cd: 2 },
+        { id: 'iman', name: 'ایمان', hp: 120, attack: 22, speed: 7, img: 'iman.png', abilityName: 'برق اتمی', abilityDesc: 'حمله صاعقه‌ای بسیار سریع', cd: 2 },
+        { id: 'pourya', name: 'پوریا', hp: 110, attack: 23, speed: 7, img: 'pourya.png', abilityName: 'تیغ زهرآگین', abilityDesc: 'ضربه کشنده با دمیج بالا', cd: 3 },
+        { id: 'mirbozorg', name: 'میربزرگ', hp: 95, attack: 28, speed: 8, img: 'mirbozorg.png', abilityName: 'طوفان سهمگین', abilityDesc: 'قدرتمندترین ضربه تخریبی', cd: 4 },
+        { id: 'mahan', name: 'ماهان', hp: 95, attack: 28, speed: 8, img: 'mahan.png', abilityName: 'شلیک لیزری', abilityDesc: 'نفوذ کامل به زره و دفاع', cd: 3 },
+        { id: 'teacher', name: 'تیچر', hp: 100, attack: 26, speed: 7, img: 'teacher.png', abilityName: 'درس نهایی', abilityDesc: 'ضربه سنگین انفجاری', cd: 3 }
     ];
 
     let isMultiplayer = false;
@@ -518,6 +594,12 @@
         target: null,
         isBusy: false
     };
+
+    function triggerShake() {
+        const arena = document.getElementById('game-screen');
+        arena.classList.add('shake');
+        setTimeout(() => arena.classList.remove('shake'), 300);
+    }
 
     function switchScene(sceneId) {
         document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
@@ -584,7 +666,11 @@
             const card = document.createElement('div');
             card.className = `card ${selectedIds.includes(char.id) ? 'selected' : ''}`;
             card.onclick = () => toggleSelect(char.id, card);
-            card.innerHTML = `<img src="${char.img}"><div class="card-name">${char.name}</div>`;
+            card.innerHTML = `
+                <img src="${char.img}">
+                <div class="card-name">${char.name}</div>
+                <div class="card-ability">✨ ${char.abilityName}</div>
+            `;
             rosterEl.appendChild(card);
         });
     }
@@ -747,14 +833,21 @@
         document.getElementById('btn-def').disabled = !isMyTurn;
         
         const abiBtn = document.getElementById('btn-ability');
+        const nameLabel = document.getElementById('ability-btn-name');
+        const descLabel = document.getElementById('ability-btn-desc');
+
+        if (curr && curr.team === 'player') {
+            nameLabel.innerText = `✨ ${curr.abilityName}`;
+            descLabel.innerText = curr.abilityDesc;
+        }
+
         if (!isMyTurn) {
             abiBtn.disabled = true;
         } else if (curr.cooldown > 0) {
             abiBtn.disabled = true;
-            abiBtn.innerText = `⏳ (${curr.cooldown})`;
+            nameLabel.innerText = `⏳ ${curr.abilityName} (${curr.cooldown} نوبت)`;
         } else {
             abiBtn.disabled = false;
-            abiBtn.innerText = `✨ حرکت ویژه`;
         }
     }
 
@@ -792,29 +885,38 @@
         const targetEl = document.getElementById(`fighter-${target.team}-${target.id}`);
         const isAbility = (actionType === 'ability');
 
-        const animClass = attacker.team === 'player' ? 'attack-right-anim' : 'attack-left-anim';
+        if (isAbility && attackerEl) {
+            attackerEl.classList.add('using-ability');
+            showPopText(attackerEl, `✨ ${attacker.abilityName}`, '#9b59b6');
+        }
+
+        const animClass = attacker.team === 'player' ? 'attack-up-anim' : 'attack-down-anim';
         if (attackerEl) attackerEl.classList.add(animClass);
 
         setTimeout(() => {
             if (targetEl) targetEl.classList.add('hurt-anim');
             playSound(isAbility ? 'ability' : 'hit');
+            triggerShake();
 
-            let dmg = isAbility ? Math.round(attacker.attack * 1.8) : attacker.attack;
+            let dmg = isAbility ? Math.round(attacker.attack * 1.9) : attacker.attack;
             if (target.isDefending) dmg = Math.round(dmg * 0.5);
 
             target.currentHp = Math.max(0, target.currentHp - dmg);
-            showPopText(targetEl, `-${dmg}`, '#ff3838');
+            showPopText(targetEl, `-${dmg}`, isAbility ? '#9b59b6' : '#ff3838');
 
-            if (isAbility) attacker.cooldown = 3;
+            if (isAbility) attacker.cooldown = attacker.cd || 3;
 
             setTimeout(() => {
                 if (targetEl) targetEl.classList.remove('hurt-anim');
             }, 350);
 
-        }, 300);
+        }, 250);
 
         setTimeout(() => {
-            if (attackerEl) attackerEl.classList.remove(animClass);
+            if (attackerEl) {
+                attackerEl.classList.remove(animClass);
+                attackerEl.classList.remove('using-ability');
+            }
             renderArena();
             nextTurn();
         }, 750);
@@ -826,7 +928,7 @@
         if (!alivePlayers.length) return;
 
         const target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
-        const useAbility = attacker.cooldown === 0 && Math.random() < 0.35;
+        const useAbility = attacker.cooldown === 0 && Math.random() < 0.4;
 
         executeActionLogic(attacker, target, useAbility ? 'ability' : 'attack');
     }
@@ -838,7 +940,7 @@
         pop.className = 'pop-dmg';
         pop.innerText = text;
         pop.style.color = color;
-        pop.style.left = `${rect.left + (rect.width / 2) - 25}px`;
+        pop.style.left = `${rect.left + (rect.width / 2) - 30}px`;
         pop.style.top = `${rect.top - 10}px`;
         document.body.appendChild(pop);
 
@@ -850,11 +952,11 @@
         const eAlive = gameState.enemy.some(e => e.currentHp > 0);
 
         if (!eAlive && gameState.player.length > 0) {
-            alert('پیروز شدید! 🎉');
+            alert('🎉 تبریک! شما پیروز این نبرد شدید.');
             location.reload();
             return true;
         } else if (!pAlive && gameState.enemy.length > 0) {
-            alert('شکست خوردید! 💀');
+            alert('💀 متاسفانه تمام رفقای شما شکست خوردند!');
             location.reload();
             return true;
         }
