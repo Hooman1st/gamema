@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>رفقای جنگجو</title>
+    <title>رفقای جنگجو - GDD Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -14,6 +14,7 @@
             --accent-red: #ff4757;
             --accent-green: #2ed573;
             --accent-purple: #9b59b6;
+            --accent-blue: #3498db;
         }
 
         * {
@@ -151,7 +152,7 @@
         .roster-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 8px;
             flex: 1;
             overflow-y: auto;
         }
@@ -170,7 +171,7 @@
 
         .card img {
             width: 100%;
-            height: 70px;
+            height: 60px;
             object-fit: contain;
         }
 
@@ -178,13 +179,12 @@
             font-size: 0.8rem;
             font-weight: bold;
             color: var(--accent-gold);
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .card-ability {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: var(--accent-cyan);
-            margin-top: 2px;
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
@@ -216,7 +216,7 @@
             pointer-events: auto;
         }
 
-        /* --- BATTLE ARENA (VERTICAL MOBILE LAYOUT) --- */
+        /* --- BATTLE ARENA --- */
         #battle-scene {
             justify-content: space-between;
             background: radial-gradient(circle, #1a102f 0%, #0d0814 100%);
@@ -224,12 +224,12 @@
 
         .status-banner {
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--accent-gold);
             font-weight: bold;
-            padding: 8px;
+            padding: 6px;
             z-index: 10;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             border-bottom: 1px solid rgba(243, 156, 18, 0.2);
         }
 
@@ -261,8 +261,8 @@
 
         .char-sprite-wrap {
             position: relative;
-            width: 75px;
-            height: 110px;
+            width: 70px;
+            height: 100px;
             display: flex;
             justify-content: center;
             align-items: flex-end;
@@ -278,7 +278,6 @@
             transition: filter 0.3s;
         }
 
-        /* تیم حریف بالا روبروی تیم شما قرار می‌گیرد */
         .enemy-side .char-sprite {
             transform: scaleY(-1) rotate(180deg);
             animation: idleBreathEnemy 2.8s infinite ease-in-out;
@@ -287,7 +286,7 @@
         .shadow-ellipse {
             position: absolute;
             bottom: -5px;
-            width: 50px;
+            width: 45px;
             height: 8px;
             background: rgba(0, 0, 0, 0.6);
             border-radius: 50%;
@@ -296,8 +295,8 @@
 
         .char-hud {
             position: absolute;
-            top: -28px;
-            width: 65px;
+            top: -35px;
+            width: 75px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -306,7 +305,7 @@
 
         .enemy-side .char-hud {
             top: auto;
-            bottom: -28px;
+            bottom: -35px;
         }
 
         .char-name-label {
@@ -316,19 +315,26 @@
             white-space: nowrap;
         }
 
-        .hp-bar-bg {
+        .bar-bg {
             width: 100%;
-            height: 6px;
+            height: 5px;
             background: #222;
             border-radius: 3px;
             overflow: hidden;
             border: 1px solid #444;
         }
 
-        .hp-bar-fill {
+        .hp-fill {
             height: 100%;
             width: 100%;
             background: var(--accent-green);
+            transition: width 0.3s ease;
+        }
+
+        .mana-fill {
+            height: 100%;
+            width: 100%;
+            background: var(--accent-blue);
             transition: width 0.3s ease;
         }
 
@@ -354,7 +360,6 @@
             50% { transform: scaleY(-1) rotate(180deg) translateY(-4px); }
         }
 
-        /* انیمیشن‌های حمله عمودی */
         .attack-down-anim {
             animation: animAttackDown 0.5s ease-in-out forwards !important;
             z-index: 100 !important;
@@ -362,7 +367,7 @@
 
         @keyframes animAttackDown {
             0% { transform: translate(0, 0); }
-            50% { transform: translate(0, 150px) scale(1.25); }
+            50% { transform: translate(0, 140px) scale(1.2); }
             100% { transform: translate(0, 0); }
         }
 
@@ -373,7 +378,7 @@
 
         @keyframes animAttackUp {
             0% { transform: translate(0, 0); }
-            50% { transform: translate(0, -150px) scale(1.25); }
+            50% { transform: translate(0, -140px) scale(1.2); }
             100% { transform: translate(0, 0); }
         }
 
@@ -405,12 +410,12 @@
 
         .btn-action {
             flex: 1;
-            padding: 12px 6px;
+            padding: 10px 6px;
             background: #2c2c54;
             border: 1px solid #40407a;
             color: #fff;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -431,15 +436,14 @@
         }
 
         .btn-subtext {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: #ccc;
             font-weight: normal;
         }
 
-        /* --- POP-UP DAMAGE / ABILITY TEXT --- */
         .pop-dmg {
             position: fixed;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 900;
             color: #ff3838;
             text-shadow: 0 0 8px #000, 2px 2px 0px #fff;
@@ -486,9 +490,7 @@
         <div class="status-banner" id="status-text">در حال آماده‌سازی...</div>
         
         <div class="arena">
-            <!-- بالا: تیم حریف -->
             <div class="team-side enemy-side" id="enemy-team"></div>
-            <!-- پایین: تیم شما -->
             <div class="team-side" id="player-team"></div>
         </div>
 
@@ -503,8 +505,8 @@
             </div>
             <div class="action-row">
                 <button class="btn-action special" id="btn-ability" onclick="handleAction('ability')">
-                    <span id="ability-btn-name">✨ حرکت ویژه</span>
-                    <span class="btn-subtext" id="ability-btn-desc">قابلیت مخصوص</span>
+                    <span id="ability-btn-name">✨ قابلیت ویژه</span>
+                    <span class="btn-subtext" id="ability-btn-desc">مهارت اختصاصی</span>
                 </button>
             </div>
         </div>
@@ -519,7 +521,6 @@
 
     document.addEventListener('contextmenu', e => e.preventDefault());
 
-    // --- WEB AUDIO API SYSTEM ---
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
 
@@ -567,17 +568,17 @@
         } catch (e) {}
     }
 
-    // --- CHARACTER DATA WITH UNIQUE ABILITIES ---
+    // --- CHARACTER DATA BASED ON GDD ---
     const CHARACTERS = [
-        { id: 'borzu', name: 'برزو', hp: 160, attack: 18, speed: 4, img: 'borzu.png', abilityName: 'مشت آهنین', abilityDesc: 'آسیب سنگین با قدرت ۲ برابر', cd: 3 },
-        { id: 'hejazi', name: 'حجازی', hp: 150, attack: 19, speed: 5, img: 'hejazi.png', abilityName: 'ضربه گیج‌کننده', abilityDesc: 'آسیب شدید و شانس جابه‌جایی', cd: 2 },
-        { id: 'komyl', name: 'کمیل', hp: 140, attack: 20, speed: 5, img: 'komyl.png', abilityName: 'شوت وحشیانه', abilityDesc: 'حمله پرقدرت مستقیم', cd: 3 },
-        { id: 'hooman', name: 'هومن', hp: 130, attack: 21, speed: 6, img: 'hooman.png', abilityName: 'تک‌نواز مرگ', abilityDesc: 'ضربه بحرانی با کریپتیک ضرب بالا', cd: 2 },
-        { id: 'iman', name: 'ایمان', hp: 120, attack: 22, speed: 7, img: 'iman.png', abilityName: 'برق اتمی', abilityDesc: 'حمله صاعقه‌ای بسیار سریع', cd: 2 },
-        { id: 'pourya', name: 'پوریا', hp: 110, attack: 23, speed: 7, img: 'pourya.png', abilityName: 'تیغ زهرآگین', abilityDesc: 'ضربه کشنده با دمیج بالا', cd: 3 },
-        { id: 'mirbozorg', name: 'میربزرگ', hp: 95, attack: 28, speed: 8, img: 'mirbozorg.png', abilityName: 'طوفان سهمگین', abilityDesc: 'قدرتمندترین ضربه تخریبی', cd: 4 },
-        { id: 'mahan', name: 'ماهان', hp: 95, attack: 28, speed: 8, img: 'mahan.png', abilityName: 'شلیک لیزری', abilityDesc: 'نفوذ کامل به زره و دفاع', cd: 3 },
-        { id: 'teacher', name: 'تیچر', hp: 100, attack: 26, speed: 7, img: 'teacher.png', abilityName: 'درس نهایی', abilityDesc: 'ضربه سنگین انفجاری', cd: 3 }
+        { id: 'borzu', name: 'برزو', bodyType: 'big', role: 'tank_poison', hp: 140, attack: 28, mana: 100, speed: 4, img: 'borzu.png', abilityName: 'تاچ منحرفانه', abilityDesc: 'سمی کردن دشمن (مانا ۷۰)', manaCost: 70, cd: 2 },
+        { id: 'mirbozorg', name: 'میربزرگ', bodyType: 'thin', role: 'disruptor', hp: 110, attack: 24, mana: 90, speed: 7, img: 'mirbozorg.png', abilityName: 'همیشه دیر می‌رسه', abilityDesc: 'تاخیر انداختن به حریف (مانا ۵۰)', manaCost: 50, cd: 2 },
+        { id: 'iman', name: 'ایمان', bodyType: 'big', role: 'fast_fighter', hp: 125, attack: 26, mana: 80, speed: 8, img: 'iman.png', abilityName: 'دوندست', abilityDesc: 'جای‌خالی دادن و Dodge (مانا ۴۰)', manaCost: 40, cd: 2 },
+        { id: 'pourya', name: 'پوریا', bodyType: 'thin', role: 'splash_dps', hp: 100, attack: 25, mana: 100, speed: 6, img: 'pourya.png', abilityName: 'نقاش', abilityDesc: 'حمله گروهی Splash (مانا ۶۰)', manaCost: 60, cd: 2 },
+        { id: 'hejazi', name: 'حجازی', bodyType: 'medium', role: 'support', hp: 120, attack: 22, mana: 100, speed: 5, img: 'hejazi.png', abilityName: 'تقویت یاران', abilityDesc: 'افزایش اتک هم‌تیمی‌ها (مانا ۵۰)', manaCost: 50, cd: 2 },
+        { id: 'mahan', name: 'ماهان', bodyType: 'thin', role: 'burst_dps', hp: 105, attack: 32, mana: 80, speed: 7, img: 'mahan.png', abilityName: 'اتک سنگین', abilityDesc: 'ضربه ۲برابر (مانا ۶۰، Cooldown 2)', manaCost: 60, cd: 2 },
+        { id: 'teacher', name: 'تیچر', bodyType: 'thin', role: 'high_dps', hp: 110, attack: 28, mana: 90, speed: 7, img: 'teacher.png', abilityName: 'بدون خطا', abilityDesc: 'بدون میس و حمله دوگانه (مانا ۶۰)', manaCost: 60, cd: 2 },
+        { id: 'komyl', name: 'کمیل', bodyType: 'big', role: 'tank_debuffer', hp: 150, attack: 22, mana: 80, speed: 3, img: 'komyl.png', abilityName: 'بطری عرق', abilityDesc: '۵۰٪ شانس میس حریف (مانا ۵۰)', manaCost: 50, cd: 3 },
+        { id: 'hooman', name: 'هومن', bodyType: 'medium', role: 'trickster', hp: 115, attack: 24, mana: 90, speed: 6, img: 'hooman.png', abilityName: 'قابلیت مخفی', abilityDesc: 'پنهان‌سازی اطلاعات (مانا ۴۰)', manaCost: 40, cd: 2 }
     ];
 
     let isMultiplayer = false;
@@ -725,8 +726,12 @@
             team,
             maxHp: base.hp,
             currentHp: base.hp,
+            currentMana: base.mana,
+            maxMana: base.mana,
             cooldown: 0,
-            isDefending: false
+            isDefending: false,
+            poisonTurns: 0,
+            isDodging: false
         };
     }
 
@@ -736,7 +741,7 @@
     }
 
     function buildTurnQueue() {
-        const all = [...gameState.player, ...gameState.enemy].filter(f => f.currentHp > 0);
+        const all = [...gameState.player, [...gameState.enemy]].flat().filter(f => f.currentHp > 0);
         all.sort((a, b) => b.speed - a.speed);
         gameState.turnQueue = all;
     }
@@ -755,8 +760,18 @@
 
         const curr = gameState.currentTurn;
         curr.isDefending = false;
+        curr.isDodging = false;
 
         if (curr.cooldown > 0) curr.cooldown--;
+        curr.currentMana = Math.min(curr.maxMana, curr.currentMana + 15); // Turn Mana Recovery
+
+        // Poison effect processing
+        if (curr.poisonTurns > 0) {
+            const poisonDmg = 15;
+            curr.currentHp = Math.max(0, curr.currentHp - poisonDmg);
+            curr.poisonTurns--;
+            showPopText(document.getElementById(`fighter-${curr.team}-${curr.id}`), `☠ -${poisonDmg}`, '#2ed573');
+        }
 
         if (curr.team === 'player') {
             const aliveEnemies = gameState.enemy.filter(e => e.currentHp > 0);
@@ -808,12 +823,14 @@
             }
         };
 
-        const pct = Math.max(0, (f.currentHp / f.maxHp) * 100);
+        const hpPct = Math.max(0, (f.currentHp / f.maxHp) * 100);
+        const manaPct = Math.max(0, (f.currentMana / f.maxMana) * 100);
 
         wrap.innerHTML = `
             <div class="char-hud">
                 <span class="char-name-label">${f.name}</span>
-                <div class="hp-bar-bg"><div class="hp-bar-fill" style="width:${pct}%; background-color:${pct < 30 ? 'var(--accent-red)' : 'var(--accent-green)'}"></div></div>
+                <div class="bar-bg"><div class="hp-fill" style="width:${hpPct}%"></div></div>
+                <div class="bar-bg"><div class="mana-fill" style="width:${manaPct}%"></div></div>
             </div>
             <div class="char-sprite-wrap">
                 <img class="char-sprite" src="${f.img}" alt="${f.name}">
@@ -843,9 +860,10 @@
 
         if (!isMyTurn) {
             abiBtn.disabled = true;
-        } else if (curr.cooldown > 0) {
+        } else if (curr.cooldown > 0 || curr.currentMana < curr.manaCost) {
             abiBtn.disabled = true;
-            nameLabel.innerText = `⏳ ${curr.abilityName} (${curr.cooldown} نوبت)`;
+            if (curr.cooldown > 0) nameLabel.innerText = `⏳ ${curr.abilityName} (${curr.cooldown})`;
+            else nameLabel.innerText = `💧 مانای ناکافی (${curr.abilityName})`;
         } else {
             abiBtn.disabled = false;
         }
@@ -885,7 +903,35 @@
         const targetEl = document.getElementById(`fighter-${target.team}-${target.id}`);
         const isAbility = (actionType === 'ability');
 
+        // Check Team Synergy: Teacher & Hooman
+        let synergyDmgBoost = 1.0;
+        const teamComps = attacker.team === 'player' ? gameState.player : gameState.enemy;
+        if (teamComps.some(c => c.id === 'teacher') && teamComps.some(c => c.id === 'hooman')) {
+            synergyDmgBoost = 1.2; // 20% team synergy boost
+        }
+
+        // Check Komeil Team Penalty (10% miss chance for teammates)
+        let missChance = 0;
+        if (teamComps.some(c => c.id === 'komyl')) {
+            missChance += 0.10;
+        }
+
+        // Check Target Dodge (Iman's Ability)
+        if (target.isDodging && Math.random() < 0.5) {
+            showPopText(targetEl, 'DODGE!', '#3498db');
+            setTimeout(nextTurn, 700);
+            return;
+        }
+
+        if (Math.random() < missChance) {
+            showPopText(attackerEl, 'MISS!', '#ff4757');
+            setTimeout(nextTurn, 700);
+            return;
+        }
+
         if (isAbility && attackerEl) {
+            attacker.currentMana -= attacker.manaCost;
+            attacker.cooldown = attacker.cd;
             attackerEl.classList.add('using-ability');
             showPopText(attackerEl, `✨ ${attacker.abilityName}`, '#9b59b6');
         }
@@ -898,13 +944,38 @@
             playSound(isAbility ? 'ability' : 'hit');
             triggerShake();
 
-            let dmg = isAbility ? Math.round(attacker.attack * 1.9) : attacker.attack;
+            let dmg = isAbility ? Math.round(attacker.attack * 1.8 * synergyDmgBoost) : Math.round(attacker.attack * synergyDmgBoost);
+
+            // Borzu Bonus Damage vs Thin body types
+            if (attacker.id === 'borzu' && target.bodyType === 'thin') {
+                dmg = Math.round(dmg * 1.35);
+            }
+
+            // Mirbozorg & Hejazi mutual relationship damage boost
+            if ((attacker.id === 'mirbozorg' && target.id === 'hejazi') || (attacker.id === 'hejazi' && target.id === 'mirbozorg')) {
+                dmg = Math.round(dmg * 1.25);
+            }
+
+            // Iman & Pourya mutual relationship damage boost
+            if ((attacker.id === 'iman' && target.id === 'pourya') || (attacker.id === 'pourya' && target.id === 'iman')) {
+                dmg = Math.round(dmg * 1.25);
+            }
+
+            // Special Ability Custom Mechanics implementation
+            if (isAbility) {
+                if (attacker.id === 'borzu') {
+                    target.poisonTurns = 2; // Apply Poison status
+                } else if (attacker.id === 'iman') {
+                    attacker.isDodging = true;
+                } else if (attacker.id === 'hejazi') {
+                    teamComps.forEach(member => member.attack = Math.round(member.attack * 1.2)); // Buff team
+                }
+            }
+
             if (target.isDefending) dmg = Math.round(dmg * 0.5);
 
             target.currentHp = Math.max(0, target.currentHp - dmg);
             showPopText(targetEl, `-${dmg}`, isAbility ? '#9b59b6' : '#ff3838');
-
-            if (isAbility) attacker.cooldown = attacker.cd || 3;
 
             setTimeout(() => {
                 if (targetEl) targetEl.classList.remove('hurt-anim');
@@ -928,7 +999,7 @@
         if (!alivePlayers.length) return;
 
         const target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
-        const useAbility = attacker.cooldown === 0 && Math.random() < 0.4;
+        const useAbility = attacker.cooldown === 0 && attacker.currentMana >= attacker.manaCost && Math.random() < 0.5;
 
         executeActionLogic(attacker, target, useAbility ? 'ability' : 'attack');
     }
@@ -952,7 +1023,7 @@
         const eAlive = gameState.enemy.some(e => e.currentHp > 0);
 
         if (!eAlive && gameState.player.length > 0) {
-            alert('🎉 تبریک! شما پیروز این نبرد شدید.');
+            alert('🎉 تبریک! تیم رفقای شما پیروز این نبرد شد.');
             location.reload();
             return true;
         } else if (!pAlive && gameState.enemy.length > 0) {
