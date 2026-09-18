@@ -568,7 +568,6 @@
         } catch (e) {}
     }
 
-    // --- CHARACTER DATA BASED ON GDD ---
     const CHARACTERS = [
         { id: 'borzu', name: 'برزو', bodyType: 'big', role: 'tank_poison', hp: 140, attack: 28, mana: 100, speed: 4, img: 'borzu.png', abilityName: 'تاچ منحرفانه', abilityDesc: 'سمی کردن دشمن (مانا ۷۰)', manaCost: 70, cd: 2 },
         { id: 'mirbozorg', name: 'میربزرگ', bodyType: 'thin', role: 'disruptor', hp: 110, attack: 24, mana: 90, speed: 7, img: 'mirbozorg.png', abilityName: 'همیشه دیر می‌رسه', abilityDesc: 'تاخیر انداختن به حریف (مانا ۵۰)', manaCost: 50, cd: 2 },
@@ -584,6 +583,7 @@
     let isMultiplayer = false;
     let peer = null;
     let conn = null;
+    let isHost = false;
 
     let selectedIds = [];
     let enemySelectedIds = [];
@@ -616,38 +616,73 @@
 
     function createRoom() {
         initAudio();
+        isHost = true;
+        isMultiplayer = true;
         const code = Math.floor(100000 + Math.random() * 900000).toString();
-        document.getElementById('room-status').innerText = 'در حال ساخت اتاق...';
-        if (peer) peer.destroy();
+        document.getElementById('room-status').innerText = 'در حال راه‌اندازی سرور اختصاصی...';
         
-        peer = new Peer('warrior-' + code);
-        peer.on('open', () => {
-            document.getElementById('room-status').innerText = `کد اتاق: ${code} (منتظر حریف...)`;
+        if (peer) {
+            try { peer.destroy(); } catch(e){}
+        }
+        
+        // استفاده از پیشوند اختصاصی برای جلوگیری از تداخل IDها
+        peer = new Peer('warrior-room-' + code, {
+            config: {'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:global.stun.twilio.com:3478' }] }
         });
+
+        peer.on('open', () => {
+            document.getElementById('room-status').innerText = `کد اتاق: ${code} (منتظر اتصال حریف...)`;
+        });
+
         peer.on('connection', (c) => {
             conn = c;
             setupMultiplayerEvents();
+            document.getElementById('room-status').innerText = 'حریف متصل شد! در حال ورود...';
+        });
+
+        peer.on('error', (err) => {
+            console.error(err);
+            document.getElementById('room-status').innerText = 'خطا در ارتباط شبکه! مجدد تلاش کنید.';
         });
     }
 
     function joinRoom() {
         initAudio();
+        isHost = false;
+        isMultiplayer = true;
         const code = document.getElementById('room-code-input').value.trim();
         if (code.length !== 6) return alert('کد ۶ رقمی را وارد کنید!');
-        document.getElementById('room-status').innerText = 'در حال اتصال...';
-        if (peer) peer.destroy();
         
-        peer = new Peer();
+        document.getElementById('room-status').innerText = 'در حال جستجو و اتصال به اتاق...';
+        
+        if (peer) {
+            try { peer.destroy(); } catch(e){}
+        }
+        
+        peer = new Peer({
+            config: {'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:global.stun.twilio.com:3478' }] }
+        });
+
         peer.on('open', () => {
-            conn = peer.connect('warrior-' + code);
+            conn = peer.connect('warrior-room-' + code, { reliable: true });
             setupMultiplayerEvents();
+        });
+
+        peer.on('error', (err) => {
+            console.error(err);
+            document.getElementById('room-status').innerText = 'اتاق پیدا نشد یا کد اشتباه است!';
         });
     }
 
     function setupMultiplayerEvents() {
+        if (!conn) return;
+
         conn.on('open', () => {
-            document.getElementById('room-status').innerText = 'متصل شد!';
-            setTimeout(() => initMode('multi'), 400);
+            document.getElementById('room-status').innerText = 'ارتباط برقرار شد!';
+            setTimeout(() => {
+                switchScene('select-scene');
+                renderRoster();
+            }, 500);
         });
 
         conn.on('data', (data) => {
@@ -657,6 +692,11 @@
             } else if (data.type === 'action') {
                 executeActionFromNetwork(data.action, data.targetId);
             }
+        });
+
+        conn.on('close', () => {
+            alert('ارتباط با حریف قطع شد!');
+            location.reload();
         });
     }
 
@@ -700,7 +740,7 @@
         } else {
             conn.send({ type: 'team_selected', ids: selectedIds });
             switchScene('landing-scene');
-            document.getElementById('room-status').innerText = 'منتظر انتخاب تیم حریف...';
+            document.getElementById('room-status').innerText = 'تیم ثبت شد. منتظر انتخاب حریف...';
             checkMultiplayerStart();
         }
     }
@@ -712,6 +752,14 @@
     }
 
     function startBattle() {
+        // در حالت آنلاین، میزبان (Host) به عنوان تیم اول و مهمان به عنوان تیم دوم تنظیم می‌شوند
+        if (isMultiplayer && !isHost) {
+            // جابجایی آرایه‌ها برای دیدگاه متقارن در شبکه
+            let temp = selectedIds;
+            selectedIds = enemySelectedIds;
+            enemySelectedIds = temp;
+        }
+
         gameState.player = selectedIds.map(id => createFighterInstance(id, 'player'));
         gameState.enemy = enemySelectedIds.map(id => createFighterInstance(id, 'enemy'));
 
@@ -741,7 +789,7 @@
     }
 
     function buildTurnQueue() {
-        const all = [...gameState.player, [...gameState.enemy]].flat().filter(f => f.currentHp > 0);
+        const all = [...gameState.player, ...gameState.enemy].flat().filter(f => f.currentHp > 0);
         all.sort((a, b) => b.speed - a.speed);
         gameState.turnQueue = all;
     }
@@ -763,9 +811,8 @@
         curr.isDodging = false;
 
         if (curr.cooldown > 0) curr.cooldown--;
-        curr.currentMana = Math.min(curr.maxMana, curr.currentMana + 15); // Turn Mana Recovery
+        curr.currentMana = Math.min(curr.maxMana, curr.currentMana + 15);
 
-        // Poison effect processing
         if (curr.poisonTurns > 0) {
             const poisonDmg = 15;
             curr.currentHp = Math.max(0, curr.currentHp - poisonDmg);
@@ -885,6 +932,7 @@
     }
 
     function executeActionFromNetwork(actionType, targetId) {
+        // در حالت آنلاین، وقتی حریف حرکتی می‌فرستد، نوبت اوست و تیمش دشمن ما محسوب می‌شود
         const attacker = gameState.currentTurn;
         let target = gameState.player.find(p => p.id === targetId) || gameState.player.find(p => p.currentHp > 0);
         executeActionLogic(attacker, target, actionType);
@@ -903,20 +951,17 @@
         const targetEl = document.getElementById(`fighter-${target.team}-${target.id}`);
         const isAbility = (actionType === 'ability');
 
-        // Check Team Synergy: Teacher & Hooman
         let synergyDmgBoost = 1.0;
         const teamComps = attacker.team === 'player' ? gameState.player : gameState.enemy;
         if (teamComps.some(c => c.id === 'teacher') && teamComps.some(c => c.id === 'hooman')) {
-            synergyDmgBoost = 1.2; // 20% team synergy boost
+            synergyDmgBoost = 1.2;
         }
 
-        // Check Komeil Team Penalty (10% miss chance for teammates)
         let missChance = 0;
         if (teamComps.some(c => c.id === 'komyl')) {
             missChance += 0.10;
         }
 
-        // Check Target Dodge (Iman's Ability)
         if (target.isDodging && Math.random() < 0.5) {
             showPopText(targetEl, 'DODGE!', '#3498db');
             setTimeout(nextTurn, 700);
@@ -946,29 +991,25 @@
 
             let dmg = isAbility ? Math.round(attacker.attack * 1.8 * synergyDmgBoost) : Math.round(attacker.attack * synergyDmgBoost);
 
-            // Borzu Bonus Damage vs Thin body types
             if (attacker.id === 'borzu' && target.bodyType === 'thin') {
                 dmg = Math.round(dmg * 1.35);
             }
 
-            // Mirbozorg & Hejazi mutual relationship damage boost
             if ((attacker.id === 'mirbozorg' && target.id === 'hejazi') || (attacker.id === 'hejazi' && target.id === 'mirbozorg')) {
                 dmg = Math.round(dmg * 1.25);
             }
 
-            // Iman & Pourya mutual relationship damage boost
             if ((attacker.id === 'iman' && target.id === 'pourya') || (attacker.id === 'pourya' && target.id === 'iman')) {
                 dmg = Math.round(dmg * 1.25);
             }
 
-            // Special Ability Custom Mechanics implementation
             if (isAbility) {
                 if (attacker.id === 'borzu') {
-                    target.poisonTurns = 2; // Apply Poison status
+                    target.poisonTurns = 2;
                 } else if (attacker.id === 'iman') {
                     attacker.isDodging = true;
                 } else if (attacker.id === 'hejazi') {
-                    teamComps.forEach(member => member.attack = Math.round(member.attack * 1.2)); // Buff team
+                    teamComps.forEach(member => member.attack = Math.round(member.attack * 1.2));
                 }
             }
 
@@ -1019,7 +1060,7 @@
     }
 
     function checkEndGame() {
-        const pAlive = gameState.player.some(p => p.currentHp > 0);
+        const pAlive =gameState.player.some(p => p.currentHp > 0);
         const eAlive = gameState.enemy.some(e => e.currentHp > 0);
 
         if (!eAlive && gameState.player.length > 0) {
